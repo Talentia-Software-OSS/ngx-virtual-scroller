@@ -1,6 +1,6 @@
 {
   "name": "@talentia/ngx-virtual-scroller",
-  "version": "4.0.6",
+  "version": "4.0.7",
   "description": "Angular module for virtual -infinite- list. Supports horizontal/vertical, variable heights, & multi-column",
   "license": "MIT",
   "keywords": [
@@ -11,8 +11,8 @@
     "angular 2"
   ],
   "peerDependencies": {
-    "@angular/common": "^16.0.0",
-    "@angular/core": "^16.0.0"
+    "@angular/common": "^17.0.0",
+    "@angular/core": "^17.0.0"
   },
   "dependencies": {
     "@tweenjs/tween.js": "17.4.0"   
