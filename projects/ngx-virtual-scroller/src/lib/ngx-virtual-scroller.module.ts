@@ -27,20 +27,20 @@ export function VIRTUAL_SCROLLER_DEFAULT_OPTIONS_FACTORY(): VirtualScrollerDefau
 }
 
 @NgModule({
-  declarations: [
-    VirtualScrollerComponent
-  ],
-  imports: [
-    CommonModule
-  ],
-  exports: [
-    VirtualScrollerComponent
-  ],
-  providers: [
-	{
-		provide: 'virtual-scroller-default-options', 
-		useFactory: VIRTUAL_SCROLLER_DEFAULT_OPTIONS_FACTORY
-	}
-  ]
+	declarations: [
+		VirtualScrollerComponent
+	],
+	imports: [
+		CommonModule
+	],
+	exports: [
+		VirtualScrollerComponent
+	],
+	providers: [
+		{
+			provide: 'virtual-scroller-default-options',
+			useFactory: VIRTUAL_SCROLLER_DEFAULT_OPTIONS_FACTORY
+		}
+	]
 })
 export class VirtualScrollerModule { }
