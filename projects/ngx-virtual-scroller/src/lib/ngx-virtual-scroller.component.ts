@@ -124,11 +124,11 @@ export interface IViewport extends IPageInfo {
   `]
 })
 export class VirtualScrollerComponent implements OnInit, OnChanges, OnDestroy, DoCheck {
-  public viewPortItems: any[];
+	public viewPortItems: any[];
 	public window = window;
 
 	public get viewPortInfo(): IPageInfo {
-		const pageInfo: IViewport = this.previousViewPort || {} as any;
+		const pageInfo = this.previousViewPort || {} as IViewport;
 		return {
 			startIndex: pageInfo.startIndex || 0,
 			endIndex: pageInfo.endIndex || 0,
@@ -327,21 +327,21 @@ export class VirtualScrollerComponent implements OnInit, OnChanges, OnDestroy, D
 		}
 	}
 
-	@Output()	public vsUpdate: EventEmitter<any[]> = new EventEmitter<any[]>();
+	@Output() public vsUpdate = new EventEmitter<any[]>();
 
-	@Output()	public vsChange: EventEmitter<IPageInfo> = new EventEmitter<IPageInfo>();
+	@Output() public vsChange = new EventEmitter<IPageInfo>();
 
-	@Output()	public vsStart: EventEmitter<IPageInfo> = new EventEmitter<IPageInfo>();
+	@Output() public vsStart = new EventEmitter<IPageInfo>();
 
-	@Output()	public vsEnd: EventEmitter<IPageInfo> = new EventEmitter<IPageInfo>();
+	@Output() public vsEnd = new EventEmitter<IPageInfo>();
 
-	@ViewChild('content', { read: ElementRef, static: true })	protected contentElementRef: ElementRef;
+	@ViewChild('content', { read: ElementRef, static: true }) protected contentElementRef: ElementRef;
 
-	@ViewChild('invisiblePadding', { read: ElementRef, static: true })	protected invisiblePaddingElementRef: ElementRef;
+	@ViewChild('invisiblePadding', { read: ElementRef, static: true }) protected invisiblePaddingElementRef: ElementRef;
 
-	@ContentChild('header', { read: ElementRef, static: false })	protected headerElementRef: ElementRef;
+	@ContentChild('header', { read: ElementRef, static: false }) protected headerElementRef: ElementRef;
 
-	@ContentChild('container', { read: ElementRef, static: false })	protected containerElementRef: ElementRef;
+	@ContentChild('container', { read: ElementRef, static: false }) protected containerElementRef: ElementRef;
 
 	public ngOnInit(): void {
 		this.addScrollEventHandlers();
@@ -431,7 +431,7 @@ export class VirtualScrollerComponent implements OnInit, OnChanges, OnDestroy, D
 	}
 
 	public scrollInto(item: any, alignToBeginning = true, additionalOffset = 0, animationMilliseconds: number = undefined, animationCompletedCallback: () => void = undefined): void {
-		const index: number = this.items.indexOf(item);
+		const index = this.items.indexOf(item);
 		if (index === -1) {
 			return;
 		}
@@ -542,9 +542,9 @@ export class VirtualScrollerComponent implements OnInit, OnChanges, OnDestroy, D
 		protected readonly renderer: Renderer2,
 		protected readonly zone: NgZone,
 		protected changeDetectorRef: ChangeDetectorRef,
-		@Inject(PLATFORM_ID) platformId: object,
-		@Optional() @Inject('virtual-scroller-default-options')
-		options: VirtualScrollerDefaultOptions
+		// eslint-disable-next-line @typescript-eslint/no-wrapper-object-types
+		@Inject(PLATFORM_ID) platformId: Object,
+		@Optional() @Inject('virtual-scroller-default-options') options: VirtualScrollerDefaultOptions
 	) {
 
 		this.isAngularUniversalSSR = isPlatformServer(platformId);
@@ -563,7 +563,7 @@ export class VirtualScrollerComponent implements OnInit, OnChanges, OnDestroy, D
 		this.resetWrapGroupDimensions();
 	}
 
-	protected getElementSize(element: HTMLElement) : any {
+	protected getElementSize(element: HTMLElement): any {
 		const result = element.getBoundingClientRect();
 		const styles = getComputedStyle(element);
 		const marginTop = parseInt(styles['margin-top'], 10) || 0;
@@ -677,7 +677,7 @@ export class VirtualScrollerComponent implements OnInit, OnChanges, OnDestroy, D
 	protected calculatedScrollbarHeight = 0;
 
 	protected padding = 0;
-	protected previousViewPort: IViewport = {} as any;
+	protected previousViewPort = {} as IViewport;
 	protected currentTween: tween.Tween;
 	protected cachedItemsLength: number;
 
@@ -691,7 +691,7 @@ export class VirtualScrollerComponent implements OnInit, OnChanges, OnDestroy, D
 		//Without maxRunTimes, If the user is actively scrolling this code would become an infinite loop until they stopped scrolling. This would be okay, except each scroll event would start an additional infinte loop. We want to short-circuit it to prevent this.
 
 		if (itemsArrayModified && this.previousViewPort && this.previousViewPort.scrollStartPosition > 0) {
-		//if items were prepended, scroll forward to keep same items visible
+			//if items were prepended, scroll forward to keep same items visible
 			const oldViewPort = this.previousViewPort;
 			const oldViewPortItems = this.viewPortItems;
 
@@ -711,7 +711,7 @@ export class VirtualScrollerComponent implements OnInit, OnChanges, OnDestroy, D
 						}
 
 						if (!itemOrderChanged) {
-							this.scrollToPosition(this.previousViewPort.scrollStartPosition + scrollLengthDelta , 0, oldRefreshCompletedCallback);
+							this.scrollToPosition(this.previousViewPort.scrollStartPosition + scrollLengthDelta, 0, oldRefreshCompletedCallback);
 							return;
 						}
 					}
@@ -740,8 +740,8 @@ export class VirtualScrollerComponent implements OnInit, OnChanges, OnDestroy, D
 				this.previousViewPort = viewport;
 
 				if (scrollLengthChanged) {
- 					this.renderer.setStyle(this.invisiblePaddingElementRef.nativeElement, 'transform', `${this._invisiblePaddingProperty}(${viewport.scrollLength})`);
- 					this.renderer.setStyle(this.invisiblePaddingElementRef.nativeElement, 'webkitTransform', `${this._invisiblePaddingProperty}(${viewport.scrollLength})`);
+					this.renderer.setStyle(this.invisiblePaddingElementRef.nativeElement, 'transform', `${this._invisiblePaddingProperty}(${viewport.scrollLength})`);
+					this.renderer.setStyle(this.invisiblePaddingElementRef.nativeElement, 'webkitTransform', `${this._invisiblePaddingProperty}(${viewport.scrollLength})`);
 				}
 
 				if (paddingChanged) {
@@ -1033,8 +1033,10 @@ export class VirtualScrollerComponent implements OnInit, OnChanges, OnDestroy, D
 			let sumOfVisibleMaxHeights = 0;
 			wrapGroupsPerPage = 0;
 
-			for (const child of content.children) {
+			// eslint-disable-next-line @typescript-eslint/prefer-for-of
+			for (let i = 0; i < content.children.length; ++i) {
 				++arrayStartIndex;
+				const child = content.children[i];
 				const clientRect = this.getElementSize(child);
 
 				maxWidthForWrapGroup = Math.max(maxWidthForWrapGroup, clientRect.width);
