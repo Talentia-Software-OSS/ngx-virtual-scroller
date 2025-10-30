@@ -3,7 +3,6 @@ import { ListItem, ListItemComponent } from './list-item.component';
 import { Chance } from 'chance';
 
 @Component({
-  standalone: false,
   template: ''
 })
 export class BaseListComponent {
