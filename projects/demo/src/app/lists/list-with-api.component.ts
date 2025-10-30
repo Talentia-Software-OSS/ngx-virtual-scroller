@@ -1,12 +1,14 @@
 import { Component, OnChanges } from '@angular/core';
 import { BaseListComponent } from './base-list.component';
-import { IPageInfo } from '@talentia/ngx-virtual-scroller';
+import { IPageInfo, VirtualScrollerModule } from '@talentia/ngx-virtual-scroller';
+import { ListItemComponent } from './list-item.component';
+import { NgFor, NgIf } from '@angular/common';
 
 @Component({
-  standalone: false,
-  selector: 'list-with-api',
-  templateUrl: 'list-with-api.component.html',
-  styleUrls: ['./list-with-api.scss']
+    selector: 'list-with-api',
+    templateUrl: 'list-with-api.component.html',
+    styleUrls: ['./list-with-api.scss'],
+    imports: [NgIf, NgFor, VirtualScrollerModule, ListItemComponent]
 })
 export class ListWithApiComponent extends BaseListComponent implements OnChanges {
   public shouldPrependItems = false;

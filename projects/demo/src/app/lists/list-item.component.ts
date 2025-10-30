@@ -13,7 +13,6 @@ export interface ListItem {
 }
 
 @Component({
-    standalone: false,
     selector: 'list-item',
     templateUrl: 'list-item.component.html',
     styleUrls: ['./list-item.scss']
