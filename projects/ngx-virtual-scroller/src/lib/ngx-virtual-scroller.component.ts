@@ -1,7 +1,7 @@
 import { isPlatformServer } from '@angular/common';
-import { ChangeDetectorRef, Component, ContentChild, ElementRef, EventEmitter, Inject, Input, NgZone, OnChanges, OnDestroy, OnInit, Optional, Output, PLATFORM_ID, Renderer2, ViewChild, DoCheck } from '@angular/core';
+import { ChangeDetectorRef, Component, ContentChild, ElementRef, EventEmitter, Input, NgZone, OnChanges, OnDestroy, OnInit, Output, PLATFORM_ID, Renderer2, ViewChild, DoCheck, inject } from '@angular/core';
 import * as tween from '@tweenjs/tween.js'
-import { VirtualScrollerDefaultOptions } from './ngx-virtual-scroller.module';
+import { VIRTUAL_SCROLLER_DEFAULT_OPTIONS_FACTORY, VirtualScrollerDefaultOptions } from './ngx-virtual-scroller.interface';
 
 export interface WrapGroupDimensions {
 	maxChildSizePerWrapGroup: WrapGroupDimension[];
@@ -343,6 +343,33 @@ export class VirtualScrollerComponent implements OnInit, OnChanges, OnDestroy, D
 
 	@ContentChild('container', { read: ElementRef, static: false }) protected containerElementRef: ElementRef;
 
+	protected isAngularUniversalSSR: boolean;
+	protected readonly element = inject(ElementRef);
+	protected readonly renderer = inject(Renderer2);
+	protected readonly zone = inject(NgZone);
+	protected readonly changeDetectorRef = inject(ChangeDetectorRef);
+	private readonly platformId = inject(PLATFORM_ID);
+
+	constructor() {
+		this.isAngularUniversalSSR = isPlatformServer(this.platformId);
+
+		const options = inject('virtual-scroller-default-options' as any, { optional: true }) as VirtualScrollerDefaultOptions | null;
+		const opts = options || VIRTUAL_SCROLLER_DEFAULT_OPTIONS_FACTORY();
+
+		this.checkResizeInterval = opts.checkResizeInterval;
+		this.modifyOverflowStyleOfParentScroll = opts.modifyOverflowStyleOfParentScroll;
+		this.resizeBypassRefreshThreshold = opts.resizeBypassRefreshThreshold;
+		this.scrollAnimationTime = opts.scrollAnimationTime;
+		this.scrollDebounceTime = opts.scrollDebounceTime;
+		this.scrollThrottlingTime = opts.scrollThrottlingTime;
+		this.scrollbarHeight = opts.scrollbarHeight;
+		this.scrollbarWidth = opts.scrollbarWidth;
+		this.stripedTable = opts.stripedTable;
+
+		this.horizontal = false;
+		this.resetWrapGroupDimensions();
+	}
+
 	public ngOnInit(): void {
 		this.addScrollEventHandlers();
 	}
@@ -533,35 +560,7 @@ export class VirtualScrollerComponent implements OnInit, OnChanges, OnDestroy, D
 
 		animate();
 		this.currentTween = newTween;
-	}
-
-	protected isAngularUniversalSSR: boolean;
-
-	constructor(
-		protected readonly element: ElementRef,
-		protected readonly renderer: Renderer2,
-		protected readonly zone: NgZone,
-		protected changeDetectorRef: ChangeDetectorRef,
-		// eslint-disable-next-line @typescript-eslint/no-wrapper-object-types
-		@Inject(PLATFORM_ID) platformId: Object,
-		@Optional() @Inject('virtual-scroller-default-options') options: VirtualScrollerDefaultOptions
-	) {
-
-		this.isAngularUniversalSSR = isPlatformServer(platformId);
-
-		this.checkResizeInterval = options.checkResizeInterval;
-		this.modifyOverflowStyleOfParentScroll = options.modifyOverflowStyleOfParentScroll;
-		this.resizeBypassRefreshThreshold = options.resizeBypassRefreshThreshold;
-		this.scrollAnimationTime = options.scrollAnimationTime;
-		this.scrollDebounceTime = options.scrollDebounceTime;
-		this.scrollThrottlingTime = options.scrollThrottlingTime;
-		this.scrollbarHeight = options.scrollbarHeight;
-		this.scrollbarWidth = options.scrollbarWidth;
-		this.stripedTable = options.stripedTable;
-
-		this.horizontal = false;
-		this.resetWrapGroupDimensions();
-	}
+	}	
 
 	protected getElementSize(element: HTMLElement): any {
 		const result = element.getBoundingClientRect();
