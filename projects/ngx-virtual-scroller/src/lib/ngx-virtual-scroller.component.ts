@@ -1,5 +1,5 @@
 import { isPlatformServer } from '@angular/common';
-import { ChangeDetectorRef, Component, ContentChild, ElementRef, EventEmitter, Input, NgZone, OnChanges, OnDestroy, OnInit, Output, PLATFORM_ID, Renderer2, ViewChild, DoCheck, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, ContentChild, ElementRef, EventEmitter, Input, NgZone, OnChanges, OnDestroy, OnInit, Output, PLATFORM_ID, Renderer2, ViewChild, ViewEncapsulation, DoCheck, inject } from '@angular/core';
 import * as tween from '@tweenjs/tween.js'
 import { VIRTUAL_SCROLLER_DEFAULT_OPTIONS_FACTORY, VirtualScrollerDefaultOptions } from './ngx-virtual-scroller.interface';
 
@@ -49,34 +49,36 @@ export interface IViewport extends IPageInfo {
 	selector: 'virtual-scroller,[virtualScroller]',
 	exportAs: 'virtualScroller',
 	template: `<div class="total-padding" #invisiblePadding></div><div class="scrollable-content" #content><ng-content></ng-content></div>`,
+	encapsulation: ViewEncapsulation.None,
 	host: {
+		'class': 'virtual-scroller',
 		'[class.horizontal]': "horizontal",
 		'[class.vertical]': "!horizontal",
 		'[class.selfScroll]': "!parentScroll",
 		'[class.rtl]': "RTL"
 	},
 	styles: [`
-    :host {
+    .virtual-scroller {
       position: relative;
 	  	display: block;
       -webkit-overflow-scrolling: touch;
     }
 
-	:host.horizontal.selfScroll {
+	.virtual-scroller.horizontal.selfScroll {
       overflow-y: visible;
       overflow-x: auto;
 	}
 
-	:host.horizontal.selfScroll.rtl {
+	.virtual-scroller.horizontal.selfScroll.rtl {
 		transform: scaleX(-1);
 	}
 
-	:host.vertical.selfScroll {
+	.virtual-scroller.vertical.selfScroll {
       overflow-y: auto;
       overflow-x: visible;
 	}
 
-    .scrollable-content {
+    .virtual-scroller > .scrollable-content {
       top: 0;
       left: 0;
       width: 100%;
@@ -86,29 +88,29 @@ export interface IViewport extends IPageInfo {
       position: absolute;
     }
 
-	.scrollable-content ::ng-deep > * {
+	.virtual-scroller > .scrollable-content > * {
 		box-sizing: border-box;
 	}
 
-	:host.horizontal {
+	.virtual-scroller.horizontal {
 		white-space: nowrap;
 	}
 
-	:host.horizontal .scrollable-content {
+	.virtual-scroller.horizontal > .scrollable-content {
 		display: flex;
 	}
 
-	:host.horizontal .scrollable-content ::ng-deep > * {
+	.virtual-scroller.horizontal > .scrollable-content > * {
 		flex-shrink: 0;
 		flex-grow: 0;
 		white-space: initial;
 	}
 
-	:host.horizontal.rtl .scrollable-content ::ng-deep > * {
+	.virtual-scroller.horizontal.rtl > .scrollable-content > * {
 		transform:scaleX(-1);
 	}
 
-    .total-padding {
+    .virtual-scroller > .total-padding {
       position: absolute;
       top: 0;
       left: 0;
@@ -118,7 +120,7 @@ export interface IViewport extends IPageInfo {
       opacity: 0;
     }
 
-    :host.horizontal .total-padding {
+    .virtual-scroller.horizontal > .total-padding {
       height: 100%;
     }
   `]
@@ -580,7 +582,7 @@ export class VirtualScrollerComponent implements OnInit, OnChanges, OnDestroy, D
 		};
 	}
 
-	protected previousScrollBoundingRect: ClientRect;
+	protected previousScrollBoundingRect: DOMRect;
 	protected checkScrollElementResized(): void {
 		const boundingRect = this.getElementSize(this.getScrollElement());
 

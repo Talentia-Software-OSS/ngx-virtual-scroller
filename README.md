@@ -11,6 +11,18 @@ This method is effective because the number of DOM elements are always constant 
 - Easy to use APIs
 - Open source and available in GitHub
 
+## Compatibility
+
+| @talentia/ngx-virtual-scroller | Angular |
+| ------------------------------ | ------- |
+| 4.0.12                         | 21.x    |
+| 4.0.11                         | 20.x    |
+| 4.0.10                         | 19.x    |
+| 4.0.8 - 4.0.9                  | 18.x    |
+| 4.0.7                          | 17.x    |
+| 4.0.5 - 4.0.6                  | 16.x    |
+| 4.0.4                          | 15.x    |
+
 ## Breaking Changes:
 
 - `v3.0.0` Several deprecated properties removed (see changelog).
@@ -41,9 +53,11 @@ This method is effective because the number of DOM elements are always constant 
 
 ## Demo
 
-[See Demo Here](http://rintoj.github.io/ngx-virtual-scroller)
+The demo app is in the `projects/demo` directory: run `npm run start` to build the library and serve the demo on [localhost:4200](http://localhost:4200).
 
 ## Usage
+
+The examples use `*ngFor`; with the built-in control flow use `@for (item of scroll.viewPortItems; track item) { ... }` (as the demo does).
 
 Preferred option:
 ```html
@@ -73,13 +87,13 @@ note: viewPortItems must be a public field to work with AOT
 
 ## Get Started
 
-**Step 1:** Install ngx-virtual-scroller
+**Step 1:** Install `@talentia/ngx-virtual-scroller` and its peer dependency `@tweenjs/tween.js` (17.4.x)
 
 ```sh
-npm install @talentia/ngx-virtual-scroller
+npm install @talentia/ngx-virtual-scroller @tweenjs/tween.js@~17.4.0
 ```
 
-**Step 2:** Import virtual scroll module into your app module
+**Step 2:** Import virtual scroll module into your app module (or in the `imports` of a standalone component)
 
 ```ts
 ....
@@ -108,6 +122,8 @@ export class AppModule { }
 ```
 
 You must also define width and height for the container and for its children.
+
+The component host gets the `virtual-scroller` CSS class: its own styles are global and scoped by that class (`.virtual-scroller > .scrollable-content > *`, ...), so they also apply to the projected children.
 
 ```css
 virtual-scroller {
@@ -211,7 +227,7 @@ If you want to use the scrollbar of a parent element, set `parentScroll` to a na
 </div>
 ```
 
-If the parentScroll is a custom angular component (instead of a native HTML element such as DIV), Angular will wrap the `#scrollingBlock` variable in an ElementRef https://angular.io/api/core/ElementRef in which case you'll need to use the `.nativeElement` property to get to the underlying JavaScript DOM element reference.
+If the parentScroll is a custom angular component (instead of a native HTML element such as DIV), Angular will wrap the `#scrollingBlock` variable in an [ElementRef](https://angular.dev/api/core/ElementRef) in which case you'll need to use the `.nativeElement` property to get to the underlying JavaScript DOM element reference.
 
 ```html
 <custom-angular-component #scrollingBlock>
@@ -398,7 +414,7 @@ You can use the `scrollInto()` or `scrollToIndex()` API to scroll into an item i
 
 ```ts
 import { Component, ViewChild } from '@angular/core';
-import { VirtualScrollerComponent } from 'ngx-virtual-scroller';
+import { VirtualScrollerComponent } from '@talentia/ngx-virtual-scroller';
 
 @Component({
     selector: 'rj-list',
@@ -420,7 +436,7 @@ export class ListComponent {
     // call this function whenever you have to focus on second item
     focusOnAnItem() {
         this.virtualScroller.items = this.items;
-        this.virtualScroller.scrollInto(items[1]);
+        this.virtualScroller.scrollInto(this.items[1]);
     }
 }
 ```
@@ -431,14 +447,16 @@ Some default config settings can be overridden via DI, so you can set them globa
 
 ```ts
 providers: [
-    provide: 'virtual-scroller-default-options', useValue: {
-        checkResizeInterval: 1000,
-        modifyOverflowStyleOfParentScroll: true,
-        resizeBypassRefreshThreshold: 5,
-        scrollAnimationTime: 750,
-        scrollDebounceTime: 0,
-        scrollThrottlingTime: 0,
-        stripedTable: false
+    {
+        provide: 'virtual-scroller-default-options', useValue: {
+            checkResizeInterval: 1000,
+            modifyOverflowStyleOfParentScroll: true,
+            resizeBypassRefreshThreshold: 5,
+            scrollAnimationTime: 750,
+            scrollDebounceTime: 0,
+            scrollThrottlingTime: 0,
+            stripedTable: false
+        }
     }
 ],
 ```
@@ -446,6 +464,8 @@ providers: [
 OR
 
 ```ts
+import { VirtualScrollerDefaultOptions } from '@talentia/ngx-virtual-scroller';
+
 export function vsDefaultOptionsFactory(): VirtualScrollerDefaultOptions {
     return {
         checkResizeInterval: 1000,
@@ -459,7 +479,7 @@ export function vsDefaultOptionsFactory(): VirtualScrollerDefaultOptions {
 }
 
 providers: [
-    provide: 'virtual-scroller-default-options', useFactory: vsDefaultOptionsFactory
+    { provide: 'virtual-scroller-default-options', useFactory: vsDefaultOptionsFactory }
 ],
 ```
 
@@ -539,7 +559,7 @@ public myTrackByFunction(index: number, complexItem: IComplexItem): number {
 _virtual-scroller_ is coded to be extremely fast. If scrolling is slow in your app, the issue is with your custom component code, not with _virtual-scroller_ itself.
 Below is an explanation of how to correct your code. This will make your entire app much faster, including _virtual-scroller_.
 
-Each component in Angular by default uses the `ChangeDetectionStrategy.Default` "CheckAlways" strategy. This means that Change Detection cycles will be running constantly which will check *EVERY* data-binding expression on *EVERY* component to see if anything has changed.
+Each component in Angular by default uses the "CheckAlways" strategy (`ChangeDetectionStrategy.Default`, renamed `ChangeDetectionStrategy.Eager` in Angular 21.2). This means that Change Detection cycles will be running constantly which will check *EVERY* data-binding expression on *EVERY* component to see if anything has changed.
 This makes it easier for programmers to code apps, but also makes apps extremely slow.
 
 If _virtual-scroller_ feels slow, a possible quick solution that masks the real problem is to use `scrollThrottlingTime` or `scrollDebounceTime` APIs.
@@ -561,7 +581,7 @@ import { ChangeDetectorRef } from '@angular/core';
 public class ManualChangeDetection {
     public queueChangeDetection(): void {
         this.changeDetectorRef.markForCheck(); // marks self for change detection on the next cycle, but doesn't actually schedule a cycle
-        this.queueApplicationTick();
+        ManualChangeDetection.queueApplicationTick();
     }
 
     public static STATIC_APPLICATION_REF: ApplicationRef;
@@ -652,6 +672,8 @@ The _ManualChangeDetection/Util_ classes are helpers that can be copy/pasted dir
 
 ## Performance - executeRefreshOutsideAngularZone
 
+The library is tested with zone.js-based change detection: since Angular 21 new applications are zoneless by default, add `provideZoneChangeDetection()` to the providers of `bootstrapApplication` (as the demo does).
+
 This API is meant as a quick band-aid fix for performance issues. Please read the other performance sections above to learn the ideal way to fix performance issues.
 
 `ChangeDetectionStrategy.OnPush` is the recommended strategy as it improves the entire app performance, not just _virtual-scroller_. However, `ChangeDetectionStrategy.OnPush` is hard to implement. `executeRefreshOutsideAngularZone` may be an easier initial approach until you're ready to tackle `ChangeDetectionStrategy.OnPush`.
@@ -724,15 +746,16 @@ Object.defineProperty(win.document.body.style, 'transform', { value: () => { ret
 2) Determine a default screen size you want to use for the SSR "screenshot" calculations (suggestion: 1920x1080). This won't be accurate for all users, but will hopefully be close enough. Once the full Angular app loads in the background, their real device screensize will take over.
 3) Run your app in a real browser without SSR and determine the average width/height of the child elements inside _virtual-scroller_ as well as the width/height of the _virtual-scroller_ (or `[parentScroll]` element). Use these values to set the `[ssrChildWidth]`/`[ssrChildHeight]`/`[ssrViewportWidth]`/`[ssrViewportHeight]` properties.
 ```html
-<virtual-scroller #scroll [items]="items">
+<virtual-scroller
+    #scroll
+    [items]="items"
+    [ssrChildWidth]="138"
+    [ssrChildHeight]="175"
+    [ssrViewportWidth]="1500"
+    [ssrViewportHeight]="800"
+>
 
-    <my-custom-component
-        *ngFor="let item of scroll.viewPortItems"
-        [ssrChildWidth]="138"
-        [ssrChildHeight]="175"
-        [ssrViewportWidth]="1500"
-        [ssrViewportHeight]="800"
-    >
+    <my-custom-component *ngFor="let item of scroll.viewPortItems">
     </my-custom-component>
 
 </virtual-scroller>
@@ -744,8 +767,16 @@ The following are known issues that we don't know how to solve or don't have the
 ### Nested Scrollbars
 If there are 2 nested scrollbars on the page the mouse scrollwheel will only affect the scrollbar of the nearest parent to the current mouse position. This means if you scroll to the bottom of a _virtual-scroller_ using the mousewheel & the window has an extra scrollbar, you cannot use the scrollwheel to scroll the page unless you move the mouse pointer out of the _virtual-scroller_ element.
 
-## Contributing
-Contributions are very welcome! Just send a pull request. Feel free to contact me or checkout my [GitHub](https://github.com/rintoj) page.
+## Build & Run
+
+Run `npm run build` to build the library. The build artifacts will be stored in the `dist/ngx-virtual-scroller` directory.
+Run `npm run start` to build the library and run the demo on [localhost:4200](http://localhost:4200).
+Run `npm run watch` to run the library and the demo in watch mode.
+Run `npm run lint` to lint the library and the demo.
+
+This project currently uses [Angular CLI](https://github.com/angular/angular-cli) version 21.2.25.
+
+Issues and pull requests: [Talentia-Software-OSS/ngx-virtual-scroller](https://github.com/Talentia-Software-OSS/ngx-virtual-scroller).
 
 ## Authors
 
@@ -762,8 +793,9 @@ Follow me:
 | [Google+](https://plus.google.com/+RintoJoseMankudy)
 | [Youtube](https://youtube.com/+RintoJoseMankudy)
 
-## Versions
-[Check CHANGELOG](https://github.com/rintoj/ngx-virtual-scroller/blob/master/CHANGELOG.md)
+## Reference
+
+This project is forked from [rintoj/ngx-virtual-scroller](https://github.com/rintoj/ngx-virtual-scroller) ([upstream CHANGELOG](https://github.com/rintoj/ngx-virtual-scroller/blob/master/CHANGELOG.md)).
 
 ## License
 ```
