@@ -2,7 +2,7 @@ import { BrowserModule, bootstrapApplication } from '@angular/platform-browser';
 import { AppRoutingModule } from './app/app-routing.module';
 import { VirtualScrollerModule } from '@talentia/ngx-virtual-scroller';
 import { AppComponent } from './app/app.component';
-import { importProvidersFrom } from '@angular/core';
+import { importProvidersFrom, provideZoneChangeDetection } from '@angular/core';
 
 const customDefaultOptions = {
 	scrollThrottlingTime: 0,
@@ -18,6 +18,7 @@ const customDefaultOptions = {
 
 bootstrapApplication(AppComponent, {
     providers: [
+        provideZoneChangeDetection(),
         importProvidersFrom(BrowserModule, AppRoutingModule, VirtualScrollerModule),
         {
             provide: 'virtual-scroller-default-options',
